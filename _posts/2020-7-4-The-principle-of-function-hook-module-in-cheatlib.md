@@ -103,9 +103,9 @@ void FuncUnhook(PFuncHookInfo ptInfo)
 > memcpy(ptInfo->pOrigFuncAddr, ptInfo->pbOpCode, 5);
 
 最后恢复页属性并释放资源
-> VirtualProtect(ptInfo->pOrigFuncAddr, 5, PAGE_EXECUTE, &oldProtect);
->        free(ptInfo->pbOpCode);
->        free(ptInfo);
+> VirtualProtect(ptInfo->pOrigFuncAddr, 5, PAGE_EXECUTE, &oldProtect);  
+>        free(ptInfo->pbOpCode);  
+>        free(ptInfo);  
 
 好了,到现在为止一个函数Hook的基本功能就算是完成了.现在到了最重要的部分,如何在我们自己的函数中去执行源函数
 ### 函数的返回值问题
@@ -133,10 +133,10 @@ int main()
 }
 ```
 我们定义了一个名为st的结构体,其中包含了两个int类型的变量
->typedef struct _st{
->    int a;
->    int b;
-> } st, *pst;
+>typedef struct _st{  
+>    int a;  
+>    int b;  
+> } st, *pst;  
 
 我们在test函数中直接返回这个结构体
 > return (st){1, 2};
@@ -264,9 +264,9 @@ void __attribute__((naked)) cheatlib_func_caller(LPVOID pOrigFuncAddr, ...)
 参数n  
   
 下面看看函数里的前3句汇编
-> "popl %%eax;"
->        "popl %%ebx;"
->        "pushl %%eax;"
+> "popl %%eax;"  
+> "popl %%ebx;"  
+> "pushl %%eax;"  
 
 意思是将"返回地址"和"参数1 - 源函数地址(pOrigFuncAddr)"出栈并保存至eax和ebx里并重新将"返回地址"压栈,执行完这些堆栈会变成下面这样:  
   
@@ -290,8 +290,8 @@ void __attribute__((naked)) cheatlib_func_caller(LPVOID pOrigFuncAddr, ...)
 只是简单的将eax和edx保存一下
 
 最后重新将源函数头改回来并恢复页属性
-> JmpBuilder((BYTE*)ptInfo->pOrigFuncAddr, (DWORD)ptInfo->pHookFuncAddr, (DWORD)ptInfo->pOrigFuncAddr); \
->        VirtualProtect(ptInfo->pOrigFuncAddr, 5, PAGE_EXECUTE, &oldProtect); \
+> JmpBuilder((BYTE*)ptInfo->pOrigFuncAddr, (DWORD)ptInfo->pHookFuncAddr, (DWORD)ptInfo->pOrigFuncAddr); \  
+> VirtualProtect(ptInfo->pOrigFuncAddr, 5, PAGE_EXECUTE, &oldProtect); \  
 
 这样就实现了调用源函数的过程
 
